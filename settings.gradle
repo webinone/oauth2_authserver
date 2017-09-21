@@ -1,0 +1,4 @@
+rootProject.name = 'oauth2'
+include 'module-biz'
+include 'module-web'
+

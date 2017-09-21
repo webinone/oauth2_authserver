@@ -1,0 +1,17 @@
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '1.5.6.RELEASE'
+
+    // https://mvnrepository.com/artifact/com.mysema.querydsl/querydsl-apt
+    compile ("com.querydsl:querydsl-core:${rootProject.ext.querydslVersion}")
+    compile ("com.querydsl:querydsl-apt:${rootProject.ext.querydslVersion}")
+    compile ("com.querydsl:querydsl-jpa:${rootProject.ext.querydslVersion}")
+
+
+    compile 'com.zaxxer:HikariCP:2.6.3'
+    runtime('com.h2database:h2')
+
+
+    compile("mysql:mysql-connector-java:5.1.34")
+}

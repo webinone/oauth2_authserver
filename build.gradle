@@ -1,0 +1,127 @@
+ext {
+    encoding = "UTF-8"
+    javaVersion = "1.8"
+    springVersion = "4.3.10.RELEASE"
+    springBootVersion = "1.5.6.RELEASE"
+    dependencyManagementPluginVersion = '1.0.3.RELEASE'
+    querydslVersion = "4.1.4"
+
+    eGovVersion = "3.1.0"
+    myBatisVersion = "3.2.7"
+    myBatisSpringVersion = "1.2.2"
+    springsecurityVersion = "3.2.5.RELEASE"
+    springjpaVersion = "1.8.0.RELEASE"
+    hibernateVersion = "4.3.10.Final"
+
+    jedisVersion = "2.7.3"
+}
+
+buildscript {
+    ext {
+        springBootVersion = '1.5.6.RELEASE'
+        dependencyManagementPluginVersion = '1.0.3.RELEASE'
+    }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url 'http://repo.spring.io/plugins-release-local'}
+        maven { url 'http://repo.spring.io/plugins-release' }
+        maven { url "https://maven.eveoh.nl/content/repositories/releases" }
+        maven { url "http://repo.spring.io/snapshot" }
+        maven { url "http://repo.spring.io/milestone" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("io.spring.gradle:dependency-management-plugin:${dependencyManagementPluginVersion}")
+    }
+}
+
+
+subprojects {
+    group 'com.coway'
+    version '0.0.1'
+
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
+
+
+    [compileJava, compileTestJava]*.options*.encoding =  rootProject.ext.encoding
+    [compileJava, compileTestJava]*.sourceCompatibility = rootProject.ext.javaVersion
+    [compileJava, compileTestJava]*.targetCompatibility = rootProject.ext.javaVersion
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url 'http://repo.spring.io/snapshot' }
+        maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url 'http://download.java.net/maven/2' }
+    }
+
+    configurations {
+        all*.exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j-impl'
+        all*.exclude group: 'commons-logging', module: 'commons-logging'
+    }
+
+    dependencies {
+        compileOnly 'org.projectlombok:lombok:1.16.18'
+        // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations
+        compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.8.9'
+        // https://mvnrepository.com/artifact/commons-io/commons-io
+        compile group: 'commons-io', name: 'commons-io', version: '2.5'
+        // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+        compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+
+        testCompile group: 'junit', name: 'junit', version: '4.12'
+        testCompile('org.springframework.boot:spring-boot-starter-test')
+    }
+
+    // 특성에 맞게 디렉토리 resource를 참조하게 해준다.
+    if(project.hasProperty('target')) {
+        sourceSets {
+            main.resources.srcDirs = ['src/main/resources', "src/main/resources-${project.target}"]
+            test.resources.srcDirs = ['src/test/resources', "src/test/resources-${project.target}"]
+        }
+    } else {
+        String hostname = InetAddress.getLocalHost().getHostName().toLowerCase();
+        if (hostname.endsWith('.local')) {
+            hostname = hostname.replace(".local", '')
+        }
+        sourceSets {
+            main.resources.srcDirs = ['src/main/resources', "src/main/resources-" + hostname]
+            test.resources.srcDirs = ['src/test/resources', "src/test/resources-" + hostname]
+        }
+        sourceSets.all {
+            set ->
+                set.allSource.srcDirs.each {
+                    if (!it.exists()) {
+                        it.mkdirs()
+                    }
+                }
+        }
+    }
+
+    task hello {
+        doLast {
+            task -> println "I'm $task.project.name"
+        }
+    }
+}
+
+project(':module-web') {
+    dependencies {
+        compile project(':module-biz')
+    }
+}
+
+//project(':module-biz') {
+//    dependencies {
+//        compile project(':module-shared')
+//    }
+//}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.0.1'
+}
